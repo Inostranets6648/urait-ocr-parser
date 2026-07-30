@@ -27,7 +27,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def convert_svg_to_png(svg_data: bytes, png_path: Path, scale: float = 3.0) -> bool:
-    """Конвертирует SVG-данные страницы в высокоразрешенный PNG."""
     try:
         doc = fitz.open(stream=svg_data, filetype="svg")
         page = doc[0]
@@ -41,7 +40,6 @@ def convert_svg_to_png(svg_data: bytes, png_path: Path, scale: float = 3.0) -> b
 
 
 def ocr_and_clean(png_path: Path) -> str:
-    """Извлекает текст из PNG с помощью Tesseract OCR и проводит постобработку."""
     try:
         raw_text = pytesseract.image_to_string(
             Image.open(png_path), lang="rus+eng"
@@ -58,14 +56,12 @@ def ocr_and_clean(png_path: Path) -> str:
 
 
 def append_page_to_txt(page_num: int, text: str):
-    """Дописывает страницу в итоговый TXT-файл."""
     with open(FINAL_TXT_PATH, "a", encoding="utf-8") as f:
         f.write(f"\n\n=== СТРАНИЦА {page_num} ===\n\n")
         f.write(text)
 
 
 def add_page_to_docx(doc, page_num: int, text: str):
-    """Добавляет страницу в существующий объект Word-документа в памяти."""
     doc.add_heading(f"Страница {page_num}", level=2)
     for paragraph in text.split("\n\n"):
         if paragraph.strip():
@@ -75,7 +71,6 @@ def add_page_to_docx(doc, page_num: int, text: str):
 
 
 def convert_docx_to_pdf():
-    """Сборка итогового PDF файла из DOCX с правильной отрисовкой кириллицы."""
     if not FINAL_DOCX_PATH.exists():
         return
 
