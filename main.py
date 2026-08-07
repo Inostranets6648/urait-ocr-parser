@@ -188,8 +188,11 @@ async def main():
         START_PARSING = True
         print(f"\nЗапуск парсинга ({max_pages} страниц)...\n")
 
+        last_saved_count = 0
+        stuck_counter = 0
+
         for i in range(max_pages):
-            print(f"Продвижение вперед ({i+1}/{max_pages})...", end="\r")
+            print(f"Листаем дальше ({i+1}/{max_pages})...", end="\r")
 
             try:
                 for _ in range(3):
@@ -205,10 +208,21 @@ async def main():
                 await asyncio.sleep(0.2)
                 await page.keyboard.press("ArrowRight")
 
-            except Exception:
+            except Exception as e:
                 pass
 
+            # Пауза на подгрузку нового SVG по сети
             await asyncio.sleep(3.5 + random.uniform(0.3, 0.7))
+
+            # --- ПРОВЕРКА НА КОНЕЦ КНИГИ ---
+            if page_counter == last_saved_count:
+                stuck_counter += 1
+                if stuck_counter >= 5:
+                    print("\n\n[АВТО-СТОП] Достигнут конец книги или подгрузка остановилась.")
+                    break
+            else:
+                stuck_counter = 0
+                last_saved_count = page_counter
 
         await browser.close()
 
